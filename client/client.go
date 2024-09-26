@@ -34,9 +34,35 @@ func New(caller http.Caller, apiKey string) *Client {
 	}
 }
 
-func (c *Client) FetchLocations(entity string) ([]types.Response, error) {
+func (c *Client) FetchAllLocations(queries, contains, matches []string) ([]types.Location, error) {
+	fmt.Printf("queries %v\n", queries)                          // TODO move to debug
+	fmt.Printf("contains: %v\nmatches: %v\n", contains, matches) // TODO move to debug
+
+	var result []types.Location
+
+	found := make(map[string]struct{})
+
+	for _, query := range queries {
+		locations, err := c.FetchLocations(query, contains, matches)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, location := range locations {
+			if _, ok := found[location.PlaceId]; !ok {
+				result = append(result, location)
+				found[location.PlaceId] = struct{}{}
+			}
+		}
+	}
+
+	return result, nil
+}
+
+func (c *Client) FetchLocations(entity string, contains, matches []string) ([]types.Location, error) {
 	var (
-		result []types.Response
+		result []types.Location
 		record types.Response
 	)
 
@@ -54,7 +80,12 @@ func (c *Client) FetchLocations(entity string) ([]types.Response, error) {
 		return nil, err
 	}
 
-	result = append(result, record)
+	// Filter results based on contains and matches
+	for _, location := range record.Results {
+		if containsAny(location.Name, contains) || matchesAny(location.Name, matches) {
+			result = append(result, location)
+		}
+	}
 
 	// Paginate through results using next_page_token
 	for record.NextPageToken != "" {
@@ -70,7 +101,12 @@ func (c *Client) FetchLocations(entity string) ([]types.Response, error) {
 			return nil, err
 		}
 
-		result = append(result, nextRecord)
+		for _, location := range nextRecord.Results {
+			if containsAny(location.Name, contains) || matchesAny(location.Name, matches) {
+				result = append(result, location)
+			}
+		}
+
 		record = nextRecord
 	}
 
@@ -89,4 +125,24 @@ func (c *Client) constructURL(entity string) string {
 
 func (c *Client) constructNextURL(token string) string {
 	return fmt.Sprintf(NextPageEndpoint, token, c.apiKey)
+}
+
+func containsAny(name string, list []string) bool {
+	for _, item := range list {
+		item = strings.TrimSpace(item)
+		if strings.Contains(strings.ToLower(name), strings.ToLower(item)) {
+			return true
+		}
+	}
+	return false
+}
+
+func matchesAny(name string, list []string) bool {
+	for _, item := range list {
+		item = strings.TrimSpace(item)
+		if strings.ToLower(name) == strings.ToLower(item) {
+			return true
+		}
+	}
+	return false
 }

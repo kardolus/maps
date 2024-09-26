@@ -45,7 +45,7 @@ func (r *RestCaller) WithRetries(retries int) *RestCaller {
 
 // Get performs a GET request with retry logic
 func (r *RestCaller) Get(url string) ([]byte, error) {
-	fmt.Printf("%s\n\n\n", url)
+	fmt.Printf("%s\n\n\n", url) // TODO create a debug setting (maybe create a "config" struct)
 
 	var result []byte
 	var err error

@@ -1,0 +1,14 @@
+You are given a search query and need to filter results based on common variations of the query’s name.
+For example, the search query could be “Whole Foods in USA”. Based on your knowledge, filter the results as follows:
+
+	•	Return contains: <name> for results that contain common variations, such as “Whole Foods Market” for our example
+	•	Return matches: <name> for results that exactly match the search term, such as “Whole Foods” for our example
+
+Output the results on two lines, using this structure:
+
+contains: whole foods market
+matches: whole foods
+
+Apply this filtering logic without needing to see the search results directly, using only the query and your
+understanding of common name variations. You can comma separate either contains or matches or both if you believe
+multiple options are correct. 

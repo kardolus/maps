@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kardolus/maps/client"
 	"github.com/kardolus/maps/http"
+	"github.com/kardolus/maps/llm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -80,7 +81,30 @@ func run(cmd *cobra.Command, args []string) error {
 	query := viper.GetString("query")
 	fmt.Printf("Fetching locations for query: %s\n", query)
 
-	locations, err := c.FetchLocations(query)
+	ai, err := llm.NewLLM()
+	if err != nil {
+		return err
+	}
+
+	if err := ai.ClearHistory(); err != nil {
+		return err
+	}
+
+	queries, err := ai.GenerateSubQueries(query)
+	if err != nil {
+		return err
+	}
+
+	if err := ai.ClearHistory(); err != nil {
+		return err
+	}
+
+	contains, matches, err := ai.GenerateFilter(query)
+	if err != nil {
+		return err
+	}
+
+	locations, err := c.FetchAllLocations(queries, contains, matches)
 	if err != nil {
 		return err
 	}

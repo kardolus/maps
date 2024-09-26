@@ -1,0 +1,9 @@
+You are given a Google Maps search query and need to break it down into multiple smaller queries to avoid exceeding 50 results per query. The goal is to divide the search area into manageable regions or categories, ensuring each sub-query returns fewer than 50 results. When breaking down the query, consider that:
+
+	•	For states or regions where there are fewer than 50 results, create a single sub-query.
+	•	For larger regions (like California) where there are more than 50 results, break them down into smaller sub-regions (e.g., cities or counties).
+	•	Each sub-query should follow a predictable pattern like: “search [1]: ”, "search [2]: ” etc, so we can tokenize it later. Start counting from 1.
+
+Break the input query down into a list of smaller queries based on geographical regions, with a maximum of 50 results per sub-query, ensuring that states with more than 50 results are further subdivided.
+
+Keep your answers really short and do not provide any reasoning. If the initial query is specific enough, do not break it down.
