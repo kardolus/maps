@@ -6,6 +6,7 @@ import (
 	"github.com/kardolus/maps/client"
 	"github.com/kardolus/maps/http"
 	"github.com/kardolus/maps/llm"
+	"github.com/kardolus/maps/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -70,6 +71,7 @@ func main() {
 	}
 }
 
+// TODO bootstrap this for testing
 func run(cmd *cobra.Command, args []string) error {
 	apiKey := viper.GetString("api-key")
 	if apiKey == "" {
@@ -81,10 +83,12 @@ func run(cmd *cobra.Command, args []string) error {
 	query := viper.GetString("query")
 	fmt.Printf("Fetching locations for query: %s\n", query)
 
-	ai, err := llm.NewLLM()
+	gpt, err := llm.NewChatGPTClient()
 	if err != nil {
 		return err
 	}
+
+	ai := llm.New(gpt, &utils.Utils{})
 
 	if err := ai.ClearHistory(); err != nil {
 		return err

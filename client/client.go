@@ -70,7 +70,6 @@ func (c *Client) FetchLocations(entity string, contains, matches []string) ([]ty
 		return nil, fmt.Errorf(ErrMissingEntity)
 	}
 
-	// First request
 	bytes, err := c.caller.Get(c.constructURL(entity))
 	if err != nil {
 		return nil, err
@@ -80,10 +79,13 @@ func (c *Client) FetchLocations(entity string, contains, matches []string) ([]ty
 		return nil, err
 	}
 
-	// Filter results based on contains and matches
-	for _, location := range record.Results {
-		if containsAny(location.Name, contains) || matchesAny(location.Name, matches) {
-			result = append(result, location)
+	if len(contains) == 0 && len(matches) == 0 {
+		result = record.Results
+	} else {
+		for _, location := range record.Results {
+			if containsAny(location.Name, contains) || matchesAny(location.Name, matches) {
+				result = append(result, location)
+			}
 		}
 	}
 

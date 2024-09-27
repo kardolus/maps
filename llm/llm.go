@@ -17,20 +17,42 @@ const (
 	inputQuery = "input query: "
 )
 
-type LLM struct {
-	client *client.Client
+//go:generate mockgen -destination=clientmocks_test.go -package=llm_test github.com/kardolus/maps/llm LLMClient
+type LLMClient interface {
+	ProvideContext(context string)
+	Query(input string) (string, int, error)
+	Stream(input string) error
+	ListModels() ([]string, error)
+	WithContextWindow(window int) *client.Client
+	WithServiceURL(url string) *client.Client
 }
 
-func NewLLM() (*LLM, error) {
-	hs, _ := history.New() // do not error out
-	c, err := client.New(http.RealCallerFactory, config.New(), hs, false)
-	if err != nil {
-		return nil, err
-	}
+// Ensure client.Client implements LLMClient interface
+var _ LLMClient = &client.Client{}
 
+//go:generate mockgen -destination=readermocks_test.go -package=llm_test github.com/kardolus/maps/llm FileReader
+type FileReader interface {
+	FileToBytes(fileName string) ([]byte, error)
+}
+
+// Ensure Utils implements FileReader interface
+var _ FileReader = &utils.Utils{}
+
+type LLM struct {
+	client     LLMClient
+	fileReader FileReader
+}
+
+func New(client LLMClient, fileReader FileReader) *LLM {
 	return &LLM{
-		client: c,
-	}, nil
+		client:     client,
+		fileReader: fileReader,
+	}
+}
+
+func NewChatGPTClient() (*client.Client, error) {
+	hs, _ := history.New() // do not error out
+	return client.New(http.RealCallerFactory, config.New(), hs, false)
 }
 
 func (l *LLM) ClearHistory() error {
@@ -40,7 +62,7 @@ func (l *LLM) ClearHistory() error {
 }
 
 func (l *LLM) GenerateSubQueries(query string) ([]string, error) {
-	bytes, err := utils.FileToBytes(promptFile)
+	bytes, err := l.fileReader.FileToBytes(promptFile)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +79,7 @@ func (l *LLM) GenerateSubQueries(query string) ([]string, error) {
 
 // GenerateFilter will extract the 'contains' and 'matches' strings from the LLM's response
 func (l *LLM) GenerateFilter(query string) ([]string, []string, error) {
-	bytes, err := utils.FileToBytes(filterFile)
+	bytes, err := l.fileReader.FileToBytes(filterFile)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
-func FileToBytes(fileName string) ([]byte, error) {
+type Utils struct {
+}
+
+func (u *Utils) FileToBytes(fileName string) ([]byte, error) {
 	_, thisFile, _, _ := runtime.Caller(0)
 
 	var (
