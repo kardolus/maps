@@ -11,4 +11,10 @@ matches: whole foods
 
 Apply this filtering logic without needing to see the search results directly, using only the query and your
 understanding of common name variations. You can comma separate either contains or matches or both if you believe
-multiple options are correct. 
+multiple options are correct.
+
+If a search query is in a country with a different language, you should apply the proper filters in those languages.
+
+If the query is very general it is safe to keep the contains and matches empty. Ie. "Wine Stores in Paris" is not looking for a
+specific store. It is looking for stores in general which will result in much fewer false positives. When no filtering is
+necessary, reply the sentence: "No filtering required".

@@ -6,4 +6,6 @@ You are given a Google Maps search query and need to break it down into multiple
 
 Break the input query down into a list of smaller queries based on geographical regions, with a maximum of 50 results per sub-query, ensuring that states with more than 50 results are further subdivided.
 
+Break down is not just for states, countries, regions etc. It can also be a breakdown of a specific city. For example, Paris has much more than 50 wines tores. So If search for wine stores in Paris it will need to be broken up as well.  
+
 Keep your answers really short and do not provide any reasoning. If the initial query is specific enough, do not break it down.
